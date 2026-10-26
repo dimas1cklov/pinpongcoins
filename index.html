@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Coin Drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f1f2;font-family:'Archivo',system-ui,sans-serif;color:#161823;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;border:none;cursor:pointer}
+input:focus{outline:none}
+.wrap{min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:24px 0}
+.phone{position:relative;width:390px;max-width:100%;height:800px;background:#fff;border-radius:36px;overflow:hidden;box-shadow:0 30px 80px rgba(22,24,35,.14),0 0 0 1px rgba(22,24,35,.06);display:flex;flex-direction:column;align-items:center}
+@media(max-width:430px){.wrap{padding:0}.phone{border-radius:0;height:100vh;min-height:720px;box-shadow:none}}
+.top{width:100%;padding:22px 22px 0;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;letter-spacing:-.02em}
+.logo{width:30px;height:30px;border-radius:9px;background:#161823;display:flex;align-items:center;justify-content:center;box-shadow:-2px -2px 0 #25F4EE,2px 2px 0 #FE2C55}
+.logo i{width:10px;height:10px;border-radius:50%;background:#fff}
+.bal{display:flex;align-items:center;gap:7px;padding:6px 12px 6px 6px;border-radius:999px;background:#f1f1f2;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.coin{border-radius:50%;background:url('https://i.ibb.co/ksvpvGpv/images.png') center/cover no-repeat;box-shadow:inset 0 0 0 2px rgba(255,255,255,.45)}
+.title{margin-top:20px;text-align:center}
+.title h1{margin:0;font-weight:900;font-size:30px;letter-spacing:-.03em;text-shadow:-2px -1px 0 #25F4EE,2px 1px 0 #FE2C55}
+.title p{margin:4px 0 0;font-weight:500;font-size:14px;color:#8a8b91}
+.queue{margin-top:16px;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#f6f6f7}
+.queue .coin{width:35px;height:35px;transition:opacity .25s}
+#board{display:flex;flex-direction:column;align-items:center}
+#cv{width:360px;height:300px;margin-top:6px;display:block}
+.bins{width:360px;padding:0 14px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;align-items:end}
+.bin{height:62px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
+.bin b{font-weight:900;font-size:18px;letter-spacing:-.03em}
+.bin small{font-weight:700;font-size:9px;letter-spacing:.08em;opacity:.8}
+.bin.jack{height:76px;background:#FE2C55;color:#fff}.bin.jack b{font-size:22px}
+.bin.jack.l{box-shadow:-3px -3px 0 #25F4EE}.bin.jack.r{box-shadow:3px -3px 0 #25F4EE}
+.bin.mid{background:#161823;color:#fff}.bin.low{background:#25F4EE;color:#161823}
+.bin.on{transform:translateY(5px) scale(1.1);box-shadow:0 0 0 3px #fff,0 0 0 6px #161823,0 10px 22px rgba(254,44,85,.4)!important}
+.bottom{margin-top:auto;width:100%;padding:0 22px 30px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.hint{font-weight:600;font-size:13px;color:#8a8b91}
+.drop{width:100%;height:60px;border-radius:16px;background:#FE2C55;color:#fff;font-weight:900;font-size:20px;letter-spacing:.08em;box-shadow:4px 4px 0 #25F4EE;transition:transform .1s,box-shadow .1s,opacity .2s}
+.drop:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #25F4EE}
+.drop:disabled{opacity:.5;cursor:default}
+.layer{position:absolute;inset:0;display:none}
+.layer.show{display:flex}
+#big{background:rgba(255,255,255,.82);flex-direction:column;align-items:center;justify-content:center;overflow:hidden;animation:fade .2s both}
+.rays{position:absolute;width:900px;height:900px;left:50%;top:50%;margin:-450px 0 0 -450px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(37,244,238,.28) 0 10deg,transparent 10deg 20deg,rgba(254,44,85,.22) 20deg 30deg,transparent 30deg 40deg);animation:spin 10s linear infinite}
+.bigc{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;animation:pop .6s cubic-bezier(.2,.9,.3,1.2) both}
+.tag{font-weight:800;font-size:14px;letter-spacing:.2em;background:#25F4EE;padding:6px 12px;border-radius:999px}
+.bigt{font-weight:900;font-size:82px;line-height:.88;letter-spacing:-.05em;text-align:center;text-shadow:-5px -3px 0 #25F4EE,5px 3px 0 #FE2C55;animation:pulse .6s ease-in-out .6s infinite}
+.cnt{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 20px 10px 10px;border-radius:999px;background:#161823;color:#fff;font-weight:900;font-size:34px;font-variant-numeric:tabular-nums}
+.cnt .coin{width:36px;height:36px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.4)}
+#sheet{background:rgba(22,24,35,.45);align-items:flex-end;animation:fade .25s both}
+.card{width:100%;background:#fff;border-radius:28px 28px 0 0;padding:28px 24px 34px;animation:up .35s cubic-bezier(.2,.9,.3,1.1) both;display:flex;flex-direction:column;align-items:center;gap:16px}
+.grab{width:40px;height:4px;border-radius:2px;background:#e3e3e6;margin-top:-14px}
+.step{display:none;width:100%;flex-direction:column;gap:14px}
+.step.show{display:flex}
+#sWon{align-items:center;text-align:center}
+.bigcoin{width:96px;height:96px;box-shadow:inset 0 0 0 6px rgba(255,255,255,.4),0 12px 30px rgba(245,180,0,.35),-4px -2px 0 #25F4EE,4px 2px 0 #FE2C55;animation:pop .5s both}
+.cong{font-weight:700;font-size:15px;color:#8a8b91;letter-spacing:.04em;text-transform:uppercase}
+.amt{font-weight:900;font-size:44px;letter-spacing:-.03em;color:#FE2C55}
+.btn{width:100%;height:56px;border-radius:14px;background:#FE2C55;color:#fff;font-weight:800;font-size:18px}
+.btn.dark{background:#161823}
+.h2{font-weight:900;font-size:24px;letter-spacing:-.02em}
+.sub{font-weight:500;font-size:14px;color:#8a8b91;margin-top:-10px}
+.field{display:flex;align-items:center;height:56px;border-radius:14px;background:#f1f1f2;padding:0 16px;gap:4px;box-shadow:inset 0 0 0 2px transparent}
+.field.err{box-shadow:inset 0 0 0 2px #FE2C55}
+.field span{font-weight:800;font-size:18px;color:#8a8b91}
+.field input{flex:1;border:none;background:transparent;font-family:inherit;font-weight:700;font-size:18px;color:#161823;min-width:0}
+.errt{font-weight:600;font-size:13px;color:#FE2C55;min-height:16px;margin-top:-6px}
+#sLoad{align-items:center;text-align:center;padding:8px 0 10px}
+.spin{width:64px;height:64px;border-radius:50%;border:6px solid #f1f1f2;border-top-color:#FE2C55;border-right-color:#25F4EE;animation:spin .8s linear infinite}
+.bar{width:100%;height:10px;border-radius:5px;background:#f1f1f2;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#25F4EE,#FE2C55);border-radius:5px;transition:width .2s linear}
+.pct{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+#prank{background:#fff;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center;animation:fade .2s both}
+.sorry{font-weight:700;font-size:15px;letter-spacing:.1em;color:#8a8b91;text-transform:uppercase}
+.pt{font-weight:900;font-size:68px;line-height:.92;letter-spacing:-.04em;text-shadow:-4px -2px 0 #25F4EE,4px 2px 0 #FE2C55;animation:pop .5s both,glitch .3s steps(2) .5s 3}
+.pd{font-weight:600;font-size:17px;max-width:280px}
+.again{margin-top:10px;height:54px;padding:0 34px;border-radius:14px;background:#FE2C55;color:#fff;font-weight:800;font-size:17px;box-shadow:4px 4px 0 #25F4EE}
+#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes glitch{0%,100%{transform:none}20%{transform:translate(-2px,1px)}40%{transform:translate(2px,-1px)}60%{transform:translate(-1px,-1px)}80%{transform:translate(1px,2px)}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="phone" id="phone">
+  <div class="top">
+    <div class="brand"><div class="logo"><i></i></div>Coin Drop</div>
+    <div class="bal"><div class="coin" style="width:35px;height:35px"></div><span id="bal">0</span></div>
+  </div>
+  <div class="title"><h1>Where will it land?</h1><p>Drop the coins — aim for the jackpots</p></div>
+  <div class="queue" id="queue"></div>
+  <div id="board">
+    <canvas id="cv"></canvas>
+    <div class="bins" id="bins"></div>
+  </div>
+  <div class="bottom">
+    <div class="hint" id="hint">Tap DROP to release 5 coins</div>
+    <button class="drop" id="drop">DROP</button>
+  </div>
+
+  <div class="layer" id="big">
+    <div class="rays"></div>
+    <div class="bigc">
+      <div class="tag">JACKPOT</div>
+      <div class="bigt">BIG<br>WIN!</div>
+      <div class="cnt"><div class="coin"></div><span id="bigc">+0</span></div>
+    </div>
+  </div>
+
+  <div class="layer" id="sheet"><div class="card">
+    <div class="grab"></div>
+    <div class="step" id="sWon">
+      <div class="coin bigcoin"></div>
+      <div class="cong">Congratulations!</div>
+      <div><div style="font-weight:600;font-size:18px">You received</div><div class="amt" id="amt">0</div><div style="font-weight:700;font-size:18px">coins</div></div>
+      <button class="btn" id="claim">Claim</button>
+    </div>
+    <div class="step" id="sNick">
+      <div class="h2">Where should we send it?</div>
+      <div class="sub">Enter your username to receive <span id="amt2">0</span> coins</div>
+      <div class="field" id="field"><span>@</span><input id="nick" placeholder="username" autocomplete="off"></div>
+      <div class="errt" id="err"></div>
+      <button class="btn dark" id="go">Continue</button>
+    </div>
+    <div class="step" id="sLoad">
+      <div class="spin"></div>
+      <div><div class="h2" style="font-size:22px">Sending coins…</div><div style="font-weight:600;font-size:14px;color:#8a8b91;margin-top:4px" id="lstep"></div></div>
+      <div class="bar"><i id="barf"></i></div>
+      <div class="pct" id="pct">0%</div>
+    </div>
+  </div></div>
+
+  <div class="layer" id="prank">
+    <div class="sorry">Sorry @<span id="pn"></span>…</div>
+    <div class="pt">IT'S A<br>PRANK!</div>
+    <div class="pd">No <span id="amt3">0</span> coins for you. Gotcha.</div>
+    <button class="again" id="again">Play again</button>
+  </div>
+
+  <canvas id="fx"></canvas>
+</div></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const VALUES = [50000, 2000, 500, 2000, 50000], SMALL = 4, isJack = b => b === 0 || b === 4;
+  const fmt = n => n.toLocaleString('en-US'), short = n => n >= 1000 ? n / 1000 + 'K' : String(n);
+  let phase = 'idle', balance = 0, launched = 0, nickVal = '';
+  let anims = [], floats = [], parts = [], shakeUntil = 0, timers = [], ac = null;
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+  // Load user image for canvas drawing
+  const coinImg = new Image();
+  coinImg.src = 'https://i.ibb.co/ksvpvGpv/images.png';
+
+  // bins + queue
+  const binsEl = $('bins');
+  VALUES.forEach((v, i) => {
+    const d = document.createElement('div');
+    d.className = 'bin ' + (isJack(v === 50000 ? i : -1) ? 'jack ' + (i === 0 ? 'l' : 'r') : v === 2000 ? 'mid' : 'low');
+    d.innerHTML = `<b>${short(v)}</b><small>${isJack(i) ? 'JACKPOT' : 'COINS'}</small>`;
+    binsEl.appendChild(d);
+  });
+  const qEl = $('queue');
+  function renderQueue() { qEl.innerHTML = ''; for (let i = 0; i <= SMALL; i++) { const c = document.createElement('div'); c.className = 'coin'; c.style.opacity = i < launched ? .2 : 1; qEl.appendChild(c); } }
+  renderQueue();
+
+  // canvases
+  const dpr = window.devicePixelRatio || 1;
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  cv.width = 360 * dpr; cv.height = 300 * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const fxc = $('fx'), fx = fxc.getContext('2d'); let FW = 390, FH = 800;
+  function sizeFx() { const r = $('phone').getBoundingClientRect(); FW = r.width; FH = r.height; fxc.width = FW * dpr; fxc.height = FH * dpr; fx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  sizeFx(); addEventListener('resize', sizeFx);
+
+  const pegs = [];
+  for (let r = 0; r < 5; r++) { const n = r + 2; for (let i = 0; i < n; i++) pegs.push({ x: 180 + (i - (n - 1) / 2) * 64, y: 34 + r * 54, r, i, hit: -1e9 }); }
+  const peg = (r, i) => pegs.find(p => p.r === r && p.i === i);
+
+  function coin(c, x, y, R) {
+    if (coinImg.complete && coinImg.naturalHeight !== 0) {
+      c.drawImage(coinImg, x - R, y - R, R * 2, R * 2);
+    }
+  }
+
+  // sound
+  function audio() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } return ac; }
+  function tone(f, dur, type, vol, delay = 0) {
+    const a = audio(); if (!a) return;
+    const t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur);
+  }
+  const click = () => tone(1100 + Math.random() * 500, 0.05, 'square', 0.035);
+
+  // paths
+  function path(main) {
+    if (main) { const right = Math.random() < .5; return { ks: right ? [1, 2, 3, 4, 5] : [0, 0, 0, 0, 0], bin: right ? 4 : 0 }; }
+    for (let t = 0; t < 200; t++) {
+      let k = Math.random() < .5 ? 0 : 1; const ks = [k];
+      for (let r = 0; r < 4; r++) { k += Math.random() < .5 ? 0 : 1; ks.push(k); }
+      const bin = Math.min(4, Math.max(0, k - 1 + (Math.random() < .5 ? 0 : 1)));
+      if (!isJack(bin)) return { ks, bin };
+    }
+    return { ks: [0, 1, 1, 2, 2], bin: 2 };
+  }
+  function build(main, at) {
+    const R = 17.5, { ks, bin } = path(main), segs = [], lift = 6 + R, dur = 475 + Math.random() * 35, hop = 22;
+    let p = peg(0, ks[0]), x = p.x + (Math.random() - .5) * 4, y = p.y - lift;
+    segs.push({ x0: 180 + (Math.random() - .5) * 30, y0: -R - 4, x1: x, y1: y, d: 550, hop: 0, ease: true, peg: p });
+    for (let r = 1; r < 5; r++) { p = peg(r, ks[r]); const nx = p.x + (Math.random() - .5) * 4, ny = p.y - lift; segs.push({ x0: x, y0: y, x1: nx, y1: ny, d: dur, hop, peg: p }); x = nx; y = ny; }
+    segs.push({ x0: x, y0: y, x1: 52 + bin * 64, y1: 300 + R + 10, d: 430, hop: 14 });
+    return { segs, idx: 0, start: null, at, R, main, bin, trail: [] };
+  }
+
+  // loop
+  function tick(t) {
+    requestAnimationFrame(tick);
+    ctx.clearRect(0, 0, 360, 300);
+    for (const pg of pegs) {
+      const k = Math.max(0, 1 - (t - pg.hit) / 350);
+      if (k > 0) { ctx.beginPath(); ctx.arc(pg.x, pg.y, 7 + k * 11, 0, 7); ctx.fillStyle = `rgba(37,244,238,${.35 * k})`; ctx.fill(); }
+      ctx.beginPath(); ctx.arc(pg.x, pg.y, 6 + k * 2, 0, 7); ctx.fillStyle = k > 0 ? '#FE2C55' : '#d3d4da'; ctx.fill();
+    }
+    for (const a of anims) {
+      if (t < a.at) continue;
+      if (a.start == null) a.start = a.at;
+      let seg = a.segs[a.idx], p = (t - a.start) / seg.d;
+      while (p >= 1) {
+        if (seg.peg) { seg.peg.hit = t; click(); }
+        a.idx++; a.start += seg.d;
+        if (a.idx >= a.segs.length) { a.done = true; land(a, t); break; }
+        seg = a.segs[a.idx]; p = (t - a.start) / seg.d;
+      }
+      if (a.done) continue;
+      const e = seg.ease ? p * p : p;
+      const b = { x: seg.x0 + (seg.x1 - seg.x0) * p, y: seg.y0 + (seg.y1 - seg.y0) * e - seg.hop * 4 * p * (1 - p) };
+      a.trail.push(b); if (a.trail.length > 12) a.trail.shift();
+      a.trail.forEach((q, i) => { ctx.beginPath(); ctx.arc(q.x, q.y, 2 + i * .5, 0, 7); ctx.fillStyle = `rgba(254,44,85,${(i / a.trail.length) * .22})`; ctx.fill(); });
+      coin(ctx, b.x, b.y, a.R);
+    }
+    anims = anims.filter(a => !a.done);
+    floats = floats.filter(f => t - f.t < 900);
+    for (const f of floats) {
+      const k = (t - f.t) / 900;
+      ctx.globalAlpha = 1 - k; ctx.font = '900 20px Archivo, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = '#161823'; ctx.fillText(f.text, f.x, 285 - k * 50); ctx.globalAlpha = 1;
+    }
+    $('board').style.transform = t < shakeUntil ? `translate(${(Math.random() - .5) * 10}px,${(Math.random() - .5) * 8}px)` : '';
+    fx.clearRect(0, 0, FW, FH);
+    for (const q of parts) {
+      q.vy += .32; q.vx *= .99; q.x += q.vx; q.y += q.vy; q.rot += q.vr;
+      fx.save(); fx.translate(q.x, q.y); fx.rotate(q.rot);
+      if (q.coin) { fx.scale(Math.abs(Math.cos(q.rot * 2)) + .2, 1); coin(fx, 0, 0, q.s); }
+      else { fx.fillStyle = q.c; fx.fillRect(-q.s / 2, -q.s / 4, q.s, q.s / 2); }
+      fx.restore();
+    }
+    parts = parts.filter(q => q.y < FH + 60);
+  }
+  requestAnimationFrame(tick);
+
+  function setHint() {
+    const left = SMALL + 1 - launched;
+    $('hint').textContent = phase === 'idle' ? `Tap DROP to release ${SMALL + 1} coins` : launched > SMALL ? 'Last coin…' : `${left} coin${left === 1 ? '' : 's'} left`;
+  }
+  function setBal() { $('bal').textContent = fmt(balance); ['amt', 'amt2', 'amt3'].forEach(id => $(id).textContent = fmt(balance)); }
+  function launchOne() { launched++; renderQueue(); setHint(); }
+
+  $('drop').onclick = () => {
+    if (phase !== 'idle') return;
+    const a = audio(); if (a && a.state === 'suspended') a.resume();
+    const now = performance.now(); anims = [];
+    phase = 'dropping'; launched = 0; $('drop').disabled = true;
+    for (let i = 0; i < SMALL; i++) { anims.push(build(false, now + i * 70)); later(launchOne, i * 70); }
+    const mainAt = SMALL * 70 + 250;
+    anims.push(build(true, now + mainAt)); later(launchOne, mainAt);
+    renderQueue(); setHint();
+  };
+
+  function land(a, t) {
+    const v = VALUES[a.bin];
+    floats.push({ x: 52 + a.bin * 64, t, text: '+' + short(v) });
+    balance += v; setBal();
+    const el = binsEl.children[a.bin]; el.classList.add('on'); later(() => el.classList.remove('on'), 380);
+    if (!a.main) { tone(1319, .18, 'triangle', .1); return; }
+    bigWin(t, a.bin);
+  }
+
+  function bigWin(t, bin) {
+    shakeUntil = t + 600; phase = 'bigwin';
+    [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .5, 'triangle', .14, i * .09));
+    const cols = ['#FE2C55', '#25F4EE', '#161823', '#f5b400'];
+    const ox = (FW - 360) / 2, bx = ox + (bin === 0 ? 52 : 308), by = Math.min(FH - 200, 470);
+    for (let i = 0; i < 160; i++) {
+      const ang = -Math.PI / 2 + (bin === 0 ? .5 : -.5) + (Math.random() - .5) * 2.2, sp = 6 + Math.random() * 11, c = Math.random() < .35;
+      parts.push({ x: bx, y: by, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, rot: Math.random() * 6, vr: (Math.random() - .5) * .4, coin: c, s: c ? 7 + Math.random() * 5 : 8 + Math.random() * 8, c: cols[i % 4] });
+    }
+    later(() => { for (let i = 0; i < 70; i++) parts.push({ x: Math.random() * FW, y: -20 - Math.random() * 200, vx: (Math.random() - .5) * 2, vy: 1 + Math.random() * 3, rot: Math.random() * 6, vr: (Math.random() - .5) * .3, coin: Math.random() < .5, s: 6 + Math.random() * 6, c: cols[i % 4] }); }, 500);
+    $('big').classList.add('show');
+    const target = VALUES[0], t0 = performance.now();
+    const civ = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / 1600), e = 1 - Math.pow(1 - k, 3);
+      $('bigc').textContent = '+' + fmt(Math.round(target * e));
+      if (k >= 1) clearInterval(civ);
+    }, 40);
+    later(() => { $('big').classList.remove('show'); showStep('sWon'); }, 3400);
+  }
+
+  function showStep(id) {
+    phase = id; $('sheet').classList.add('show');
+    ['sWon', 'sNick', 'sLoad'].forEach(s => $(s).classList.toggle('show', s === id));
+  }
+  $('claim').onclick = () => { showStep('sNick'); setTimeout(() => $('nick').focus(), 50); };
+  $('nick').oninput = e => { e.target.value = e.target.value.replace(/[@\s]/g, '').slice(0, 24); nickVal = e.target.value; $('err').textContent = ''; $('field').classList.remove('err'); $('go').style.opacity = nickVal.length >= 2 ? 1 : .4; };
+  $('go').style.opacity = .4;
+  $('nick').onkeydown = e => { if (e.key === 'Enter') submit(); };
+  $('go').onclick = submit;
+  function submit() {
+    if (nickVal.trim().length < 2) { $('err').textContent = 'Username must be at least 2 characters'; $('field').classList.add('err'); return; }
+    $('nick').blur(); showStep('sLoad');
+    const steps = [`Connecting to @${nickVal}…`, 'Verifying account…', `Transferring ${fmt(balance)} coins…`, 'Almost done…'];
+    let prog = 0;
+    const iv = setInterval(() => {
+      prog = Math.min(100, prog + (prog < 70 ? 2 + Math.random() * 3 : prog < 96 ? .6 + Math.random() * 1.2 : .4));
+      const p = Math.floor(prog);
+      $('barf').style.width = p + '%'; $('pct').textContent = p + '%'; $('lstep').textContent = steps[Math.min(3, Math.floor(p / 25))];
+      if (prog >= 100) {
+        clearInterval(iv);
+        later(() => {
+          $('sheet').classList.remove('show'); $('pn').textContent = nickVal; $('prank').classList.add('show'); phase = 'prank';
+          tone(220, .35, 'sawtooth', .08); tone(165, .5, 'sawtooth', .08, .25);
+        }, 400);
+      }
+    }, 80);
+    timers.push(iv);
+  }
+
+  $('again').onclick = () => {
+    timers.forEach(x => { clearTimeout(x); clearInterval(x); }); timers = [];
+    anims = []; parts = []; floats = []; balance = 0; launched = 0; phase = 'idle';
+    $('prank').classList.remove('show'); $('sheet').classList.remove('show'); $('big').classList.remove('show');
+    $('barf').style.width = '0%'; $('pct').textContent = '0%'; $('drop').disabled = false;
+    setBal(); renderQueue(); setHint();
+  };
+})();
+</script>
+</body>
+</html>
